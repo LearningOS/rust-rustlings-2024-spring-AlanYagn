@@ -3,7 +3,7 @@
 	This problem requires you to implement a basic interface for a binary tree
 */
 
-//I AM NOT DONE
+
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -49,15 +49,57 @@ where
     }
 
     // Insert a value into the BST
-    fn insert(&mut self, value: T) {
-        //TODO
+    fn insert(&mut self, value: T)where
+    T: Copy + Clone, {
+        let new_node = Box::new(TreeNode::new(value));
+
+        if self.root.is_none() {
+            self.root = Some(new_node);
+            return;
+        }
+
+        let mut current = self.root.as_mut();
+
+        while let Some(node) = current {
+            match value.cmp(&node.value) {
+                Ordering::Less => {
+                    if node.left.is_none() {
+                        node.left = Some(new_node);
+                        return;
+                    }
+                    current = node.left.as_mut();
+                }
+                Ordering::Greater => {
+                    if node.right.is_none() {
+                        node.right = Some(new_node);
+                        return;
+                    }
+                    current = node.right.as_mut();
+                }
+                Ordering::Equal => {
+                    // Handle duplicate values
+                    return;
+                }
+            }
+        }
     }
+    
 
     // Search for a value in the BST
     fn search(&self, value: T) -> bool {
-        //TODO
-        true
+        let mut current = &self.root;
+
+        while let Some(node) = current {
+            match value.cmp(&node.value) {
+                Ordering::Less => current = &node.left,
+                Ordering::Greater => current = &node.right,
+                Ordering::Equal => return true,
+            }
+        }
+
+        false
     }
+
 }
 
 impl<T> TreeNode<T>
@@ -65,8 +107,28 @@ where
     T: Ord,
 {
     // Insert a node into the tree
-    fn insert(&mut self, value: T) {
-        //TODO
+    fn insert(&mut self, value: T)where
+    T: Copy + Clone, {
+        let new_node = Box::new(TreeNode::new(value));
+
+        if value < self.value {
+            if self.left.is_none() {
+                self.left = Some(new_node);
+                return;
+            }
+            let current = self.left.as_mut().unwrap();
+            current.insert(value);
+        } else if value > self.value {
+            if self.right.is_none() {
+                self.right = Some(new_node);
+                return;
+            }
+            let current = self.right.as_mut().unwrap();
+            current.insert(value);
+        } else {
+            // Handle duplicate values
+            return;
+        }
     }
 }
 

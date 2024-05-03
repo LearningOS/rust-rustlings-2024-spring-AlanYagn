@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -20,6 +19,26 @@ impl<T> Heap<T>
 where
     T: Default,
 {
+    fn heapify_up(&mut self, idx: usize) {
+        let mut child_idx = idx;
+        let mut parent_idx = self.parent_idx(child_idx);
+
+        while child_idx > 1 && (self.comparator)(&self.items[child_idx], &self.items[parent_idx]) {
+            self.items.swap(child_idx, parent_idx);
+            child_idx = parent_idx;
+            parent_idx = self.parent_idx(child_idx);
+        }
+    }
+    fn heapify_down(&mut self, idx: usize) {
+        let mut parent_idx = idx;
+        let mut child_idx = self.smallest_child_idx(parent_idx);
+
+        while child_idx <= self.count && (self.comparator)(&self.items[child_idx], &self.items[parent_idx]) {
+            self.items.swap(child_idx, parent_idx);
+            parent_idx = child_idx;
+            child_idx = self.smallest_child_idx(parent_idx);
+        }
+    }
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
@@ -37,7 +56,9 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        self.heapify_up(self.count);
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +78,16 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+
+        if right > self.count {
+            left
+        } else if (self.comparator)(&self.items[left], &self.items[right]) {
+            left
+        } else {
+            right
+        }
     }
 }
 
@@ -84,9 +113,17 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+
+        let root = self.items.swap_remove(1);
+        self.count -= 1;
+        self.heapify_down(1);
+
+        Some(root)
     }
+   
 }
 
 pub struct MinHeap;
